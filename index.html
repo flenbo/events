@@ -8,7 +8,12 @@
 <meta name="description" content="ZOVRYN — Delhi NCR's luxury culinary & experiential hospitality brand. Bespoke catering and private dining for weddings, cocktail functions and celebrations.">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="icon" href="assets/zovryn-crest.png">
-<link rel="apple-touch-icon" href="assets/zovryn-crest.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZOVRYN">
 </head>
 <body>
 <div class="app" id="app">
@@ -224,5 +229,6 @@
 <script src="js/store.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/client.js"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 </body>
 </html>

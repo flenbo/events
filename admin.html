@@ -7,6 +7,12 @@
 <title>ZOVRYN — Operations Console</title>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="icon" href="assets/zovryn-crest.png">
+<link rel="manifest" href="manifest-admin.json">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZOVRYN Ops">
 </head>
 <body class="admin-body">
 
@@ -110,5 +116,6 @@
 <script src="js/store.js"></script>
 <script src="js/pdf.js"></script>
 <script src="js/admin.js"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 </body>
 </html>
