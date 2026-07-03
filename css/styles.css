@@ -391,3 +391,6 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
   .opt-grid{grid-template-columns:1fr 1fr 1fr}
   h1{font-size:2.7rem}
 }
+
+/* Embedded form (admin/ops Create & Edit Event modal) */
+body.embed .sync-banner{display:none}
