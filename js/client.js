@@ -41,7 +41,19 @@
   // ---- Embedded mode (admin/ops opens this form inside the console) ----
   var Q = new URLSearchParams(location.search);
   var EMBED = Q.has('embed') || Q.has('by');
-  var ACTOR = (function(){ var b=(Q.get('by')||'').toLowerCase(); if(b==='admin')return 'Admin'; if(b==='ops'||b==='operations')return 'Operations'; return 'Client'; })();
+  // Trust admin/ops params ONLY when this page is embedded inside the
+  // authenticated Operations Console (same-origin parent with a valid session).
+  // This prevents anyone from editing records via a crafted public URL.
+  function adminAuthorized(){
+    try{
+      if(window.parent===window) return false;
+      var s=window.parent.sessionStorage.getItem('zov_admin');
+      if(!s) return false;
+      var o=JSON.parse(s); return !!(o && o.role);
+    }catch(e){ return false; }
+  }
+  var ADMIN_OK = adminAuthorized();
+  var ACTOR = (function(){ if(!ADMIN_OK) return 'Client'; var b=(Q.get('by')||'').toLowerCase(); if(b==='admin')return 'Admin'; if(b==='ops'||b==='operations')return 'Operations'; return 'Client'; })();
   function postParent(type, extra){ if(EMBED && window.parent && window.parent!==window){ try{ window.parent.postMessage(Object.assign({type:type},extra||{}),'*'); }catch(e){} } }
 
   function toast(msg, kind){
@@ -415,7 +427,7 @@
     var flow=Q.get('flow');
     if(flow==='new'){
       startNewCustomer();
-    } else if(flow==='edit' && Q.get('file')){
+    } else if(flow==='edit' && Q.get('file') && ADMIN_OK){
       var fno=Q.get('file');
       window.GG_STORE.get(fno).then(function(rec){
         if(rec) loadRecord(rec);
