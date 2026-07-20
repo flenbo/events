@@ -133,10 +133,11 @@
   }
 
   // ===== DETAIL MODAL =====
-  function openDetail(fileNumber, editMode){
+  function openDetail(fileNumber, editMode, backDate){
     var e=events.filter(function(x){return String(x.fileNumber)===String(fileNumber);})[0]; if(!e)return;
     $('#mTitle').textContent='File '+e.fileNumber+' · '+cap(e.clientName);
     var body=$('#mBody'); body.innerHTML='';
+    if(backDate){ var _bk=el('button','btn sm btn-ghost','← Back to '+prettyDate(backDate)); _bk.style.marginBottom='14px'; _bk.onclick=function(){ openDayEvents(backDate); }; body.appendChild(_bk); }
 
     // meta strip
     var meta=el('div','detail-sec'); meta.style.padding='16px 20px';
@@ -152,7 +153,7 @@
     STAGES.forEach(function(s,i){
       var cls = i===cur?'active':(i<cur?'done':'');
       var b=el('div','pstage '+cls, (i<cur?'✓ ':'')+s);
-      b.onclick=function(){ S.update(e.fileNumber,{status:s},actorRole()).then(function(){ e.status=s; e.lastModifiedBy=actorRole(); e.lastUpdatedOn=new Date().toISOString(); renderAll(); openDetail(e.fileNumber,editMode); toast('Status → '+s,'ok'); }); };
+      b.onclick=function(){ S.update(e.fileNumber,{status:s},actorRole()).then(function(){ e.status=s; e.lastModifiedBy=actorRole(); e.lastUpdatedOn=new Date().toISOString(); renderAll(); openDetail(e.fileNumber,editMode,backDate); toast('Status → '+s,'ok'); }); };
       pl.appendChild(b);
     });
     pipe.appendChild(pl); body.appendChild(pipe);
@@ -205,6 +206,26 @@
   }
   function closeModal(){ $('#detailModal').classList.remove('show'); document.body.classList.remove('no-scroll'); }
 
+  // ===== DAY EVENTS (calendar day with multiple events) =====
+  function prettyDate(ds){ try{ return new Date(ds+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ds; } }
+  function openDayEvents(ds){
+    var evs=events.filter(function(e){return e.eventDate===ds;});
+    if(evs.length<=1){ if(evs[0]) openDetail(evs[0].fileNumber,false); return; }
+    $('#mTitle').textContent=prettyDate(ds)+' · '+evs.length+' events';
+    var body=$('#mBody'); body.innerHTML='';
+    var hint=el('p','small muted'); hint.style.marginBottom='12px'; hint.textContent='Select an event to view its details.'; body.appendChild(hint);
+    var list=el('div','ev-list');
+    evs.forEach(function(e){
+      var c=el('div','ev-card '+timing(e));
+      c.innerHTML='<div class="r1"><div><div class="eid">File '+esc(e.fileNumber)+'</div><div class="cname">'+esc(cap(e.clientName))+'</div></div><span class="badge '+badgeClass(e.status)+'">'+esc(e.status)+'</span></div>'+
+        '<div class="meta"><span>📞 <b>'+esc(e.mobile||'—')+'</b></span><span>'+esc(cap(e.eventSlot||'—'))+'</span><span>👥 <b>'+esc(e.pax||'—')+'</b> pax</span><span>'+esc(cap(e.eventType||'—'))+'</span></div>';
+      c.onclick=function(){ openDetail(e.fileNumber,false,ds); };
+      list.appendChild(c);
+    });
+    body.appendChild(list);
+    $('#detailModal').classList.add('show'); document.body.classList.add('no-scroll');
+  }
+
   // ===== CREATE / EDIT EVENT (embedded client form) =====
   function openFormModal(mode, fileNumber){
     var by = actorRole()==='Operations' ? 'ops' : 'admin';
@@ -232,7 +253,7 @@
       var ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       var cell=el('div','cal-cell'+(ds===todayStr?' today':'')); cell.innerHTML='<div class="cd">'+d+'</div>';
       var evs=byDate[ds]||[];
-      if(evs.length){ var e0=evs[0]; var chip=el('div','cev '+timing(e0), esc(cap(e0.clientName).split(' ')[0])+(evs.length>1?' +'+(evs.length-1):'')); chip.onclick=function(id){return function(ev){ev.stopPropagation();openDetail(id,false);};}(e0.fileNumber); cell.appendChild(chip); }
+      if(evs.length){ var e0=evs[0]; var chip=el('div','cev '+timing(e0), esc(cap(e0.clientName).split(' ')[0])+(evs.length>1?' +'+(evs.length-1):'')); cell.appendChild(chip); cell.style.cursor='pointer'; cell.onclick=(function(dstr,fn,cnt){ return function(){ if(cnt>1) openDayEvents(dstr); else openDetail(fn,false); }; })(ds, e0.fileNumber, evs.length); }
       grid.appendChild(cell);
     }
   }
