@@ -226,10 +226,6 @@
     var fd1=field('Preferred Discussion Date <span class="req">*</span>', d1); fd1.appendChild(errNode()); b.appendChild(fd1);
     var t1=input('time',state.discTime); t1.oninput=function(){state.discTime=this.value;};
     var ft1=field('Preferred Discussion Time <span class="req">*</span>', t1); ft1.appendChild(errNode()); b.appendChild(ft1);
-    var d2=input('date',state.discAltDate); d2.oninput=function(){state.discAltDate=this.value;};
-    b.appendChild(field('Alternate Preferred Date <span class="muted small">(optional)</span>', d2));
-    var t2=input('time',state.discAltTime); t2.oninput=function(){state.discAltTime=this.value;};
-    b.appendChild(field('Alternate Preferred Time <span class="muted small">(optional)</span>', t2));
   }
 
   function rReview(b){
