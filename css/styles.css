@@ -309,6 +309,7 @@ select{appearance:none;-webkit-appearance:none;background-image:url("data:image/
 .admin-shell{max-width:1160px;margin:0 auto;padding:0 0 60px}
 .admin-top{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line);color:var(--text);display:flex;align-items:center;justify-content:space-between;padding:12px 20px;box-shadow:0 1px 0 rgba(30,22,15,.02)}
 .admin-top .who{font-size:.74rem;color:var(--gold);letter-spacing:.08em}
+.admin-top .admin-logo{height:40px;width:auto;display:block}
 .admin-nav{display:flex;gap:4px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 12px;overflow-x:auto;position:sticky;top:53px;z-index:25}
 .admin-nav button{background:none;border:none;font-family:var(--sans);font-size:.8rem;letter-spacing:.08em;color:var(--muted);padding:16px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;font-weight:500}
 .admin-nav button.active{color:var(--gold);border-color:var(--gold)}
@@ -400,8 +401,8 @@ body.embed .sync-banner{display:none}
 @media(max-width:600px){
   .admin-shell{padding:0 0 60px;overflow-x:hidden}
   .admin-page{padding:18px 14px}
-  .admin-top{padding:10px 14px}
-  .admin-top .admin-brand-name{display:none}
+  .admin-top{padding:10px 12px}
+  .admin-top .admin-logo{height:30px}
   .admin-top .who{display:none}
   .admin-top .btn.sm{padding:9px 11px;font-size:.64rem;letter-spacing:.05em}
   .cards-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
