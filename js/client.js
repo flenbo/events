@@ -54,6 +54,8 @@
   }
   var ADMIN_OK = adminAuthorized();
   var ACTOR = (function(){ if(!ADMIN_OK) return 'Client'; var b=(Q.get('by')||'').toLowerCase(); if(b==='admin')return 'Admin'; if(b==='ops'||b==='operations')return 'Operations'; return 'Client'; })();
+  // Public clients must complete every section; admin/ops create+edit stays flexible.
+  var STRICT = !ADMIN_OK;
   function postParent(type, extra){ if(EMBED && window.parent && window.parent!==window){ try{ window.parent.postMessage(Object.assign({type:type},extra||{}),'*'); }catch(e){} } }
 
   function toast(msg, kind){
@@ -140,7 +142,7 @@
     var ft=field('Event Time <span class="req">*</span>', tm); ft.appendChild(errNode()); b.appendChild(ft);
 
     var oc=input('text', state.occasion, 'e.g. 25th Wedding Anniversary'); oc.oninput=function(){state.occasion=this.value;};
-    b.appendChild(field('Occasion', oc));
+    var foc=field('Occasion <span class="req">*</span>', oc); foc.dataset.key='occasion'; foc.appendChild(errNode()); b.appendChild(foc);
 
     var px=input('number', state.pax, 'Approx. number of guests'); px.min=1; px.oninput=function(){state.pax=this.value;};
     var fp=field('Guest Count / PAX <span class="req">*</span>', px); fp.appendChild(errNode()); b.appendChild(fp);
@@ -151,21 +153,22 @@
     locWrap.appendChild(optCards(D.eventLocations, state.location, false, function(v){ state.location=v; locOther.style.display=/others/i.test(v)?'block':'none'; }));
     var locOther=input('text',state.locationOther,'Please specify'); locOther.style.display=/others/i.test(state.location)?'block':'none'; locOther.style.marginTop='10px';
     locOther.oninput=function(){state.locationOther=this.value;}; locWrap.appendChild(locOther);
-    b.appendChild(field('Event Location', locWrap));
+    var flo=field('Event Location <span class="req">*</span>', locWrap); flo.dataset.key='location'; flo.appendChild(errNode()); b.appendChild(flo);
 
     var vn=el('textarea'); vn.value=state.venue; vn.placeholder='Full venue address / landmark'; vn.style.minHeight='80px';
     vn.oninput=function(){state.venue=this.value;};
-    b.appendChild(field('Venue Details', vn));
+    var fvn=field('Venue Details <span class="req">*</span>', vn); fvn.dataset.key='venue'; fvn.appendChild(errNode()); b.appendChild(fvn);
   }
 
   function rServices(b){
     b.appendChild(intro('Services & Experiences','Select everything you\'d like us to bring to life. Choose as many as you wish.'));
-    b.appendChild(field('Services Required', optCards(D.servicesRequired, state.services, true, function(){})));
+    var fsv=field('Services Required <span class="req">*</span>', optCards(D.servicesRequired, state.services, true, function(){})); fsv.dataset.key='services'; fsv.appendChild(errNode()); b.appendChild(fsv);
     b.appendChild(field('Add-on Resources', optCards(D.addOnResources, state.addons, true, function(){})));
   }
 
   function rMenu(b){
     b.appendChild(intro('Curate Your Menu','Browse by category or search. Select as many dishes as you like — our chefs will refine with you on the call.'));
+    var menuErr=el('div','field'); menuErr.dataset.key='menu'; var me=errNode(); me.textContent='Please select at least one dish, or add a custom menu request below.'; menuErr.appendChild(me); b.appendChild(menuErr);
     var sw=el('div','menu-search'); var si=input('search','','Search dishes…'); sw.appendChild(si); b.appendChild(sw);
     var tabs=el('div','cat-tabs'); b.appendChild(tabs);
     var list=el('div'); b.appendChild(list);
@@ -214,7 +217,7 @@
     b.appendChild(intro('Additional Notes','Please share any additional details, preferences, or special requests for your event.'));
     var ta=el('textarea'); ta.value=state.notes; ta.placeholder='Themes, colour palette, allergies, timing preferences, décor inspiration, budget indications…'; ta.style.minHeight='180px';
     ta.oninput=function(){state.notes=this.value;};
-    b.appendChild(field('Your Notes', ta));
+    var fnotes=field('Your Notes <span class="req">*</span>', ta); fnotes.dataset.key='notes'; fnotes.appendChild(errNode()); b.appendChild(fnotes);
   }
 
   function rDiscuss(b){
@@ -262,6 +265,7 @@
     var b=$('#formSteps'); var ok=true;
     $$('.input-err',b).forEach(function(x){x.classList.remove('input-err');});
     $$('.err-msg.show',b).forEach(function(x){x.classList.remove('show');});
+    $$('.opt-grid',b).forEach(function(x){x.style.outline='';});
     var id=STEPS[current].id;
     if(id==='entry'){
       if(!state.clientName.trim()){ failInput(b,0); ok=false; }
@@ -274,13 +278,30 @@
       if(!state.eventTime){failByType(b,'time');ok=false;}
       if(!state.pax){failByType(b,'number');ok=false;}
       if(!state.dietary){markGroup(b,1);ok=false;}
+      if(STRICT){
+        if(!state.occasion.trim()){ failKey(b,'occasion'); ok=false; }
+        if(!state.location){ failKey(b,'location'); ok=false; }
+        if(!state.venue.trim()){ failKey(b,'venue'); ok=false; }
+      }
     }
+    if(STRICT && id==='services' && !state.services.length){ failKey(b,'services'); ok=false; }
+    if(STRICT && id==='menu'){
+      var mc=0; Object.keys(state.menu).forEach(function(c){ mc+=(state.menu[c]||[]).length; });
+      if(mc===0 && !state.customMenu.trim()){ failKey(b,'menu'); ok=false; }
+    }
+    if(STRICT && id==='notes' && !state.notes.trim()){ failKey(b,'notes'); ok=false; }
     if(id==='discuss'){
       if(!state.discDate){failByType(b,'date',0);ok=false;}
       if(!state.discTime){failByType(b,'time',0);ok=false;}
     }
     if(!ok) toast('Please complete the highlighted fields.','err');
     return ok;
+  }
+  function failKey(b,key){
+    var f=b.querySelector('[data-key="'+key+'"]'); if(!f) return;
+    var m=f.querySelector('.err-msg'); if(m) m.classList.add('show');
+    var grid=f.querySelector('.opt-grid'); if(grid) grid.style.outline='1px solid var(--red)';
+    var inp=f.querySelector('input,textarea'); if(inp) inp.classList.add('input-err');
   }
   function failInput(b,idx){var e=$$('input',b)[idx]; if(e){e.classList.add('input-err'); var m=e.parentNode.querySelector('.err-msg'); if(m)m.classList.add('show');}}
   function failByType(b,type,idx){var els=$$('input[type="'+type+'"]',b); var e=els[idx||0]; if(e){e.classList.add('input-err'); var m=(e.parentNode.parentNode&&e.parentNode.parentNode.querySelector('.err-msg'))||e.parentNode.querySelector('.err-msg'); if(m)m.classList.add('show');}}
