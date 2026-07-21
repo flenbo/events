@@ -103,7 +103,7 @@
       '<span class="badge '+badgeClass(e.status)+'">'+esc(e.status)+'</span></div>'+
       '<div class="meta">'+
         '<span>📞 <b>'+esc(e.mobile||'—')+'</b></span>'+
-        '<span>📅 <b>'+esc(e.eventDate||'—')+'</b></span>'+
+        '<span>📅 <b>'+esc(e.eventDate?prettyDate(e.eventDate):'—')+'</b></span>'+
         '<span>'+esc(cap(e.eventSlot||'—'))+'</span>'+
         '<span>👥 <b>'+esc(e.pax||'—')+'</b> pax</span>'+
         '<span>'+esc(cap(e.eventType||'—'))+'</span>'+
@@ -174,7 +174,7 @@
     }
     body.appendChild(kvsec('Client Info',[['Name',cap(e.clientName)],['Mobile',e.mobile]]));
     body.appendChild(kvsec('Event Info',[
-      ['Type',cap(e.eventType)+(e.eventTypeOther?' ('+e.eventTypeOther+')':'')],['Date',e.eventDate],['Slot',cap(e.eventSlot)],
+      ['Type',cap(e.eventType)+(e.eventTypeOther?' ('+e.eventTypeOther+')':'')],['Date',e.eventDate?prettyDate(e.eventDate):''],['Slot',cap(e.eventSlot)],
       ['Time',e.eventTime],['Occasion',e.occasion],['PAX',e.pax],['Dietary',cap(e.dietary)],
       ['Location',cap(e.location)+(e.locationOther?' ('+e.locationOther+')':'')],['Venue',e.venue]
     ]));
